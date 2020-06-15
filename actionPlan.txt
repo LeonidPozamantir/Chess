@@ -1,0 +1,9 @@
+1. Build 1-component react and backend with 1 endpoint and deploy it on AWS
+    a) Create backend and frontend like in MERN
+    b) Make one endpoint in back
+    c) In front there should be one NavLink that navigates to Route that shows a container component that makes request to the endpoint and write it to its state
+    d) Make project work in production (see end of MERN video)
+    e) Check that production build works on local
+    d) Make a project on AWS EC2
+    e) Install git and node on AWS EC2
+    f) Check that the project runs on AWS
