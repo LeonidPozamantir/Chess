@@ -2,8 +2,43 @@
     a) Create backend and frontend like in MERN
     b) Make one endpoint in back
     c) In front there should be one NavLink that navigates to Route that shows a container component that makes request to the endpoint and write it to its state
+        // in typescript react-route-dom should be installed along with @types/react-route-dom
     d) Make project work in production (see end of MERN video)
     e) Check that production build works on local
-    d) Make a project on AWS EC2
-    e) Install git and node on AWS EC2
-    f) Check that the project runs on AWS
+    d) Make a project on AWS EC2 // to connect, it has to have internet gateway. Default VPC has it.
+    e) Install git and node on AWS EC2 (pay attention: to add key to github it should be converted to OpenSSH: public from the frame, private is exported as id_rsa to .ssh)
+    f) Check that the project runs on AWS // shoud be run with SUDO
+
+2. Build authorization page
+    a) Make header, navbar and content
+    b) Make auth and game tabs in navbar with corresponding pages
+    c) Add redux and auth reducer
+    с1) Fake reducer, store, connect
+    d) Build redux form on login page (first wo thunk, async call from the component)
+    e) Make fake login backend endpoint
+    f) Make sure that data is received on the back side
+    g) add express-session, check that count views works https://www.npmjs.com/package/express-session
+    h) add passport
+            https://habr.com/ru/post/201206/
+            https://habr.com/ru/post/435106/
+    i) add button to from that gets session content, check that session is filled, then make the button get req.user
+
+3. Make some order in the work done
+    a) Back to front: make AuthPage typization
+    b) Add fields validation
+    c) Create complex form components
+    d) Show errors in the login form
+    e) Move login request to thunk
+    f) Show username in the header
+    g) Make redirect to game if logged in
+    h) Add preloader component
+    i) Make endpoint "me" and getAuthUserData thunk
+    j) Call getAuthUserData from app
+    k) Add HOC withAuthRedirect, wrap GamePage with it and see that logged user is redirected to login page and back
+    i) Make app reducer and call app.initialize from App component instead of getAuthUserData
+    j) Show preloader if not logged in
+
+4. 
+
+TODO:
+1) Set session parameters (httpOnly?)

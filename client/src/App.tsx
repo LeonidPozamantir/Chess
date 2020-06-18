@@ -1,16 +1,44 @@
 import React from 'react';
-import { BrowserRouter, Route, NavLink } from 'react-router-dom';
-import { AuthPage } from './components/AuthPage/AuthPage';
+import s from './App.module.css';
+import { Route } from 'react-router-dom';
+import AuthPage from './components/AuthPage/AuthPage';
+import Header from './components/Header/Header';
+import { Navbar } from './components/Navbar/Navbar';
+import GamePage from './components/GamePage/GamePage';
+import Preloader from './components/common/Preloader/Preloader';
+import { connect } from 'react-redux';
+import { AppStateType } from './redux/store';
+import { getAuthUserData } from './redux/auth-reducer';
 
-function App() {
-    return (
-        <div className="App">
-            <BrowserRouter>
-                <NavLink to='/auth'>Authorization</NavLink>
-                <Route path='/auth' render={() => <AuthPage />} />
-            </BrowserRouter>
-        </div>
-    );
+class App extends React.Component<PropsType> {
+
+    componentDidMount() {
+        this.props.getAuthUserData();
+    }
+
+    render() {
+        return (
+            <div className={s.app}>
+                <Header />
+                <Navbar />
+                <div className={s.content}>
+                    {/* <Preloader /> */}
+                    <Route path='/auth' render={() => <AuthPage />} />
+                    <Route path='/game' render={() => <GamePage />} />
+                </div>
+            </div>
+        );
+    }
 }
 
-export default App;
+const mapStateToProps = (state: AppStateType) => ({
+
+});
+
+export default connect<MapPropsType, DispatchPropsType, {}, AppStateType>(mapStateToProps, { getAuthUserData })(App);
+
+type MapPropsType = ReturnType<typeof mapStateToProps>;
+type DispatchPropsType = {
+    getAuthUserData: () => void,
+};
+type PropsType = MapPropsType & DispatchPropsType;

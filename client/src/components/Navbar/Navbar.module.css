@@ -1,0 +1,20 @@
+.navbar {
+    grid-area: n;
+    background-color: palegoldenrod;
+}
+
+.item {
+    text-align: center;
+}
+
+.active {
+    background-color: dimgray;
+}
+
+a {
+    display: block;
+    width: 100px;
+    padding: 20px 0;
+    text-decoration: none;
+    color: indigo;
+}
