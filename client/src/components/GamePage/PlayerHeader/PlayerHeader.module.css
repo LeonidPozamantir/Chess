@@ -1,0 +1,4 @@
+.playerHeader {
+    height: var(--player-header-height);
+    color: white;
+}

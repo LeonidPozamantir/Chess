@@ -2,7 +2,7 @@ import React from 'react';
 import s from './Navbar.module.css';
 import { NavLink } from 'react-router-dom';
 
-export const Navbar = () => {
+const Navbar = () => {
     return <nav className={s.navbar}>
         <div className={s.item}>
             <NavLink to='/auth' activeClassName={s.active}>Login</NavLink>
@@ -13,3 +13,5 @@ export const Navbar = () => {
         
     </nav>;
 };
+
+export default Navbar;

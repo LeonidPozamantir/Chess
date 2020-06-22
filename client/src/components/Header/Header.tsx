@@ -2,12 +2,17 @@ import React from 'react';
 import s from './Header.module.css';
 import { connect } from 'react-redux';
 import { AppStateType } from '../../redux/store';
+import { logout } from '../../redux/authReducer';
 
-export const Header: React.FC<PropsType> = (props) => {
+const Header: React.FC<PropsType> = (props) => {
+    const handleLogout = () => {
+        props.logout();
+    };
+
     return <div className={s.header}>
         {props.isAuth && <div className={s.rightBlock}>
             Shalom, {props.userName}
-            <button onClick={() => alert('logout')}>Logout</button>
+            <button onClick={handleLogout}>Logout</button>
         </div>}
     </div>;
 };
@@ -17,7 +22,10 @@ const mapStateToProps = (state: AppStateType) => ({
     userName: state.auth.userName,
 });
 
-export default connect<MapPropsType, {}, {}, AppStateType>(mapStateToProps)(Header);
+export default connect<MapPropsType, DispatchPropsType, {}, AppStateType>(mapStateToProps, {logout})(Header);
 
 type MapPropsType = ReturnType<typeof mapStateToProps>;
-type PropsType = MapPropsType;
+type DispatchPropsType = {
+    logout: () => void,
+};
+type PropsType = MapPropsType & DispatchPropsType;

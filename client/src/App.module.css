@@ -1,16 +1,21 @@
 .app {
     display: grid;
-    grid-template-rows: 60px 15px 1fr;
+    grid-template-rows: var(--header-height) var(--header-content-space) 1fr;
     grid-template-columns: 100px 15px 1fr;
     grid-template-areas:
         "h h h"
         ". . ."
         "n . c";
     height: 100%;
-    padding: 20px 0px;
+    padding: var(--app-padding) 0px;
+    --app-padding: 20px;
+    --header-height: 60px;
+    --header-content-space: 15px;
 }
 
 .content {
     grid-area: c;
-    background-color: green;
+    background-color: 172727;
+    padding-left: 100px;
+    --content-height: calc(100vh - 2*var(--app-padding) - var(--header-height) - var(--header-content-space));
 }

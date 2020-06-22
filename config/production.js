@@ -1,7 +1,6 @@
 module.exports = {
     general: {
-        port: 5000,
-        httpsEnabled: false, //TODO in the distant future
+        port: 80,
     },
     secrets: {
         session: 'keyboard cat',

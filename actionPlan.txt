@@ -23,7 +23,7 @@
             https://habr.com/ru/post/435106/
     i) add button to from that gets session content, check that session is filled, then make the button get req.user
 
-3. Make some order in the work done
+3. Make some order in the work done - front
     a) Back to front: make AuthPage typization
     b) Add fields validation
     c) Create complex form components
@@ -35,10 +35,58 @@
     i) Make endpoint "me" and getAuthUserData thunk
     j) Call getAuthUserData from app
     k) Add HOC withAuthRedirect, wrap GamePage with it and see that logged user is redirected to login page and back
-    i) Make app reducer and call app.initialize from App component instead of getAuthUserData
+            - good point to check in production
+    i) Infer action types using generic types
+            https://www.youtube.com/watch?v=RKrkQxFYJ1c
+            https://habr.com/ru/company/alfa/blog/452620/
+    i) Make app reducer and call app. Initialize from App component instead of getAuthUserData
     j) Show preloader if not logged in
 
-4. 
+4. Make order in the work done - back
+    a) Move passport configuration to a separate file
+    b) Work on session parameters
+    c) Move secrets to config
+    d) Make dbConnector and request it for users
+    e) Add production.js to config
+
+5. Login process improvement
+    a) Try to set individual parameters for a session (needed for rememberMe)
+    b) Implement rememberMe
+    c) Implement logout
+
+6. Begin working on the game page
+    a) Build the screen styled div structure
+    b) Add colored cells that react to click alerting their coord
+    c) Try to put a single piece on board
+    d) Take that single piece from an array and make it clickable
+    d) Put all pieces for the position as a parameter, position hardcoded
+    e) Break into components
+    f) Improve styling
+    g) Build game reducer (without actions for now)
+    h) Make order in types
+
+7. Add some dynamics to the board
+    a) Trace the move made:
+        - make local state for selected cells
+        - handle clicks on pieces and empty cells (make alert to show the move)
+        - style selected cells
+    b) Make action and move the piece
+
+8. Rules compliance
+    a) Full position data
+    b) Move validity check
+    c) Update moveMake action for castling, piece capture, en passant
+
+9. Additional forms
+    a) Registration page
+    b) Registration endpoint
+    c) Settings page
+    d) Settings enpoint
 
 TODO:
-1) Set session parameters (httpOnly?)
+front:
+- show only relevant tabs
+- flip board
+
+back:
+- encrypt password

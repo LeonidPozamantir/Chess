@@ -1,0 +1,37 @@
+.board {
+    position: relative;
+    width: var(--board-width);
+    height: var(--board-width);
+    margin: var(--board-margin) 0;
+    --board-margin: 20px;
+    --board-width: calc(var(--content-height) - 2*var(--board-margin) - 2*var(--player-header-height));
+}
+
+.cell {
+    position: absolute;
+    width: 12.5%;
+    height: 12.5%;
+}
+
+.cell.white {
+    background-color: #f0d9b5;
+}
+.cell.white.selected {
+    background-color: #cdd26a;
+}
+
+.cell.black {
+    background-color: #946f51;
+}
+.cell.black.selected {
+    background-color: #aaa23a;
+}
+
+.piece {
+    position: absolute;
+    width: 12.5%;
+}
+
+.cell.selected {
+    background-color: yellow;
+}

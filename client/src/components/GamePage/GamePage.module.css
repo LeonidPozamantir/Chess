@@ -1,0 +1,11 @@
+.externalContainer {
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.extendedBoard {
+    position: relative;
+    --player-header-height: 40px;
+}
+
