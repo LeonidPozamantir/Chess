@@ -6,30 +6,44 @@ import GameStatus from './GameStatus/GameStatus';
 import Board from './Board/Board';
 import { connect } from 'react-redux';
 import { AppStateType } from '../../redux/store';
-import { gameActions } from '../../redux/gameReducer';
+import { gameActions, MoveType, PromotionPieceType } from '../../redux/gameReducer';
 
-const GamePage: React.FC<PropsType> = ({ position, makeMove }) => {
-    debugger;
-    // @ts-ignore
-    window.functions.sayHello();
-    return <div className={s.externalContainer}>
-        <div className={s.extendedBoard}>
-            <PlayerHeader />
-            <Board position={position} makeMove={makeMove}/>
-            <PlayerHeader />
-        </div>
-        <GameStatus />
-    </div>;
+class GamePage extends React.Component<PropsType> {
+    
+    componentDidMount() {
+        this.props.setDefaultPosition();
+    }
+
+    render() {
+        const { piecesList, sideToMove, isPromotion, makeMove, choosePromotion } = this.props;
+        return <div className={s.externalContainer}>
+            <div className={s.extendedBoard}>
+                <PlayerHeader />
+                <Board piecesList={piecesList} makeMove={makeMove} sideToMove={sideToMove} isPromotion={isPromotion} choosePromotion={choosePromotion}/>
+                <PlayerHeader />
+            </div>
+            <GameStatus />
+        </div>;
+    }
+    
 };
 
 const mapStateToProps = (state: AppStateType) => ({
-    position: state.game.position,
+    piecesList: state.game.position.piecesList,
+    sideToMove: state.game.position.sideToMove,
+    isPromotion: !!state.game.position.promotionChoice,
 });
 
-export default withAuthRedirect(connect<MapPropsType, DispatchPropsType, {}, AppStateType>(mapStateToProps, {makeMove: gameActions.makeMove})(GamePage));
+export default withAuthRedirect(connect<MapPropsType, DispatchPropsType, {}, AppStateType>(mapStateToProps, {
+    makeMove: gameActions.makeMove,
+    setDefaultPosition: gameActions.setDefaultPosition,
+    choosePromotion: gameActions.choosePromotion,
+})(GamePage));
 
 type MapPropsType = ReturnType<typeof mapStateToProps>;
 type DispatchPropsType = {
-    makeMove: (fromX: number, fromY: number, toX: number, toY: number) => void,
+    makeMove: (move: MoveType) => void,
+    setDefaultPosition: () => void,
+    choosePromotion: (pt: PromotionPieceType) => void,
 }
 type PropsType = MapPropsType & DispatchPropsType;

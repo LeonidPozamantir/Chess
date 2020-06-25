@@ -16,4 +16,4 @@ export const pieceImages = {
     wp, wn, wb, wr, wq, wk, bp, bn, bb, br, bq, bk,
 };
 
-export type PieceTypeType = getStringKeys<typeof pieceImages>;
+export type PieceType = getStringKeys<typeof pieceImages>;

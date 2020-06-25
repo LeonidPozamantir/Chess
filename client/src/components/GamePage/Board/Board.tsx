@@ -1,7 +1,8 @@
 import React from 'react';
 import s from './Board.module.css';
 import { pieceImages } from '../../../utils/pieceImages';
-import { PositionType, PieceType } from '../../../redux/gameReducer';
+import { PositionType, PiecePositionType, MoveType, PiecesListType, PromotionPieceType } from '../../../redux/gameReducer';
+import PromotionChoice from './PromotionChoice';
 
 class Board extends React.Component<PropsType, StateType> {
 
@@ -13,20 +14,22 @@ class Board extends React.Component<PropsType, StateType> {
     }
 
     handleCellClick(x: number, y: number) {
+        if (this.props.isPromotion) return;
         const sc = this.state.selectedCell;
         if (sc) {
-            this.props.makeMove(sc.x, sc.y, x, y);
+            this.props.makeMove({fromX: sc.x, fromY: sc.y, toX: x, toY: y});
             this.setState({ selectedCell: null });
         }
     }
 
-    handlePieceClick(p: PieceType) {
+    handlePieceClick(p: PiecePositionType) {
+        if (this.props.isPromotion) return;
         if(this.state.selectedCell) this.handleCellClick(p.x, p.y);
         else this.setState({ selectedCell: {x: p.x, y: p.y} });
     }
 
     render() {
-        const {position: {piecesList}} = this.props;
+        const {piecesList, sideToMove, isPromotion, choosePromotion} = this.props;
         const r8_1 = [8, 7, 6, 5, 4, 3, 2, 1];
         const c1_8 = [1, 2, 3, 4, 5, 6, 7, 8];
         const rows = r8_1.map(rowNum => {
@@ -36,15 +39,16 @@ class Board extends React.Component<PropsType, StateType> {
                 let sc = this.state.selectedCell;
                 let isSelected = sc && sc.x === colNum && sc.y === rowNum ? s.selected : '';
                 let color = (colNum + rowNum) % 2 === 0 ? 'black' : 'white';
-                return <div className={`${s.cell} ${s[color]} ${isSelected}`} style={{left, top}} onClick={() => this.handleCellClick(colNum, rowNum)}></div>;
+                return <div key={`${colNum}${rowNum}`} className={`${s.cell} ${s[color]} ${isSelected}`} style={{left, top}} onClick={() => this.handleCellClick(colNum, rowNum)}></div>;
             });
         });
-        const pieces = piecesList.map(p => {
-            return <img className={s.piece} src={pieceImages[p.type]} onClick={() => this.handlePieceClick(p)} style={{left: (p.x - 1) * 12.5 + '%', top: (8 - p.y) * 12.5 + '%'}} />
+        const pieces = piecesList.map((p, idx) => {
+            return <img className={s.piece} key={idx} src={pieceImages[p.type]} onClick={() => this.handlePieceClick(p)} style={{left: (p.x - 1) * 12.5 + '%', top: (8 - p.y) * 12.5 + '%'}} />
         });
         return <div className={s.board}>
             {rows}
             {pieces}
+            {isPromotion && <PromotionChoice color={sideToMove} choosePromotion={choosePromotion} />}
         </div>;
     }
     
@@ -53,8 +57,11 @@ class Board extends React.Component<PropsType, StateType> {
 export default Board;
 
 type PropsType = {
-    position: PositionType,
-    makeMove: (fromX: number, fromY: number, toX: number, toY: number) => void,
+    piecesList: PiecesListType,
+    sideToMove: 'w' | 'b',
+    isPromotion: boolean,
+    makeMove: (move: MoveType) => void,
+    choosePromotion: (pt: PromotionPieceType) => void,
 };
 type StateType = {
     selectedCell: {x: number, y: number} | null,

@@ -1,5 +1,6 @@
 import { InferActionsTypes, BaseThunkType } from "./store";
 import { getAuthUserData } from "./authReducer";
+import ChessPosition, { classUpdate } from '../utils/ChessPosition';
 
 const initialState = {
     initialized: false,
@@ -19,9 +20,24 @@ const actions = {
 };
 
 export const initializeApp = (): ThunkType => (dispatch) => {
-    return dispatch(getAuthUserData())
+    return Promise.all([
+        dispatch(getAuthUserData()),
+        dispatch(loadScript()),
+    ])
     .then(() => {
         dispatch(actions.setInitialized(true));
+    });
+};
+
+const loadScript = () => () => {
+    return new Promise((resolve) => {
+        const script = document.createElement("script");
+        script.src = "/libs";
+        script.onload = () => {
+            classUpdate((window as Window & typeof globalThis & {ChessPosition: typeof ChessPosition}).ChessPosition);
+            resolve();
+        }
+        document.body.appendChild(script);
     });
 }
 

@@ -1,0 +1,19 @@
+.frame {
+    position: absolute;
+    top: 40%;
+    left: 10%;
+    height: 20%;
+    width: 80%;
+    background-color: snow;
+    border: double black 3px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.choosePiece {
+    margin-top: auto;
+    margin-bottom: auto;
+    height: 70%;
+    cursor: pointer;
+}

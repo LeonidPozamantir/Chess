@@ -71,11 +71,19 @@
         - handle clicks on pieces and empty cells (make alert to show the move)
         - style selected cells
     b) Make action and move the piece
+        - good point to check in production
 
 8. Rules compliance
-    a) Full position data
-    b) Move validity check
-    c) Update moveMake action for castling, piece capture, en passant
+    a) Make common script for back and front:
+        https://justinklemm.com/sharing-javascript-backend-node-js-frontend-browser/
+        https://stackoverflow.com/questions/34424845/adding-script-tag-to-react-jsx
+    b) Make class Position and take all data from there
+    c) Add full position data
+    d) Move validity check
+    e) Update moveMake action for castling, piece capture, en passant, pawn promotion
+    f) Make UI and method for choosing promotion piece
+    g) Make a test - number of legal moves vs Arena for a real game
+        - good point to check in production
 
 9. Additional forms
     a) Registration page
