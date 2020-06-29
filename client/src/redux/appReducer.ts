@@ -6,7 +6,7 @@ const initialState = {
     initialized: false,
 };
 
-export const appReducer = (state = initialState, action: ActionsTypes): InitialStateType => {
+export const appReducer = (state = initialState, action: ActionsType): InitialStateType => {
     switch (action.type) {
         case 'APP/SET_INITIALIZED':
             return {...state, initialized: action.initialized};
@@ -42,5 +42,5 @@ const loadScript = () => () => {
 }
 
 type InitialStateType = typeof initialState;
-type ActionsTypes = InferActionsTypes<typeof actions>;
-type ThunkType = BaseThunkType<ActionsTypes>;
+type ActionsType = InferActionsTypes<typeof actions>;
+type ThunkType = BaseThunkType<ActionsType>;

@@ -4,16 +4,23 @@ import thunkMiddleware, { ThunkAction } from "redux-thunk";
 
 import { authReducer } from "./authReducer";
 import { appReducer } from "./appReducer";
-import { gameReducer } from "./gameReducer";
+import { gameReducer, gameActions } from "./gameReducer";
+import { profileReducer } from "./profileReducer";
+import { socketAPI } from "../api/api";
 
 const rootReducer = combineReducers({
     auth: authReducer,
     form: formReducer,
     app: appReducer,
     game: gameReducer,
+    profile: profileReducer,
 });
 
 const store = createStore(rootReducer, applyMiddleware(thunkMiddleware));
+
+socketAPI.setCallback((message: any) => {
+    store.dispatch(gameActions.makeMove(message.move));
+})
 
 export default store;
 

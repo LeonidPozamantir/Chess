@@ -4,13 +4,16 @@ const config = require('config');
 const path = require('path');
 const session = require('express-session');
 const passport = require('passport');
+const http = require('http');
 
-const auth = require('./lib/auth');
+require('./lib/auth'); // DO NOT DELETE - passport initialization
+const socketManager = require('./lib/socketManager');
+const gameManager = require('./lib/gameManager');
+const randomComputerPlayer = require('./lib/randomComputerPlayer');
 
 const PORT = config.general.port || 5000;
 
-app.use(express.json());
-app.use(session({ 
+const sessionMiddleware = session({
     secret: config.secrets.session,
     rolling: true,
     resave: false,
@@ -20,11 +23,16 @@ app.use(session({
         sameSite: true,
         secure: config.general.httpsEnabled,
     },
-}));
+});
+
+app.use(express.json());
+app.use(sessionMiddleware);
 app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/auth', require('./routes/auth.routes'));
+app.use('/profile', require('./routes/profile.routes'));
+app.use('/game', require('./routes/game.routes'));
 app.get('/libs', (req, res) => {
     res.sendFile(path.resolve(__dirname, 'lib', 'ChessPosition.js'));
 });
@@ -36,6 +44,14 @@ if (process.env.NODE_ENV === 'production') {
     });
 }
 
-app.listen(PORT, () => {
+const server = http.createServer(app);
+socketManager.init(server, sessionMiddleware);
+socketManager.setListener(gameManager);
+gameManager.setClientManager(socketManager);
+gameManager.setComputerPlayer(randomComputerPlayer);
+
+server.listen(PORT, () => {
     console.log(`Listening on port ${PORT}`);
 });
+
+

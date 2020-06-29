@@ -7,7 +7,7 @@ let initialState = {
     isAuth: false,
 };
 
-export const authReducer = (state = initialState, action: ActionTypes): InitialStateType => {
+export const authReducer = (state = initialState, action: ActionsType): InitialStateType => {
     switch(action.type) {
         case 'AUTH/SET_AUTH_DATA':
             return {...state, userName: action.userName, isAuth: action.isAuth};
@@ -31,6 +31,17 @@ export const login = (userName: string, password: string, rememberMe: boolean): 
     });
 };
 
+export const register = (userName: string, password: string, email: string, rememberMe: boolean): ThunkType => (dispatch) => {
+    return authAPI.register(userName, password, email, rememberMe)
+    .then(data => {
+        if (data.resultCode === ResultCodesEnum.Success) dispatch(actions.setAuthData(userName, true));
+        else {
+            const errorMessage = data.messages && data.messages.length && data.messages[0] || 'Some error occured';
+            dispatch(stopSubmit('register', {_error: errorMessage}));
+        }
+    });
+}
+
 export const logout = (): ThunkType => (dispatch) => {
     return authAPI.logout()
     .then(data => {
@@ -48,5 +59,5 @@ export const getAuthUserData = (): ThunkType => (dispatch) => {
 
 type InitialStateType = typeof initialState;
 type setAuthDataReturnType = InferActionsTypes<typeof actions>;
-type ActionTypes = setAuthDataReturnType; // TODO
-type ThunkType = BaseThunkType<ActionTypes | FormAction>;
+type ActionsType = setAuthDataReturnType; // TODO
+type ThunkType = BaseThunkType<ActionsType | FormAction>;

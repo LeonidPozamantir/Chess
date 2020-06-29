@@ -8,9 +8,14 @@ const Navbar = () => {
             <NavLink to='/auth' activeClassName={s.active}>Login</NavLink>
         </div>
         <div className={s.item}>
+            <NavLink to='/register' activeClassName={s.active}>Register</NavLink>
+        </div>
+        <div className={s.item}>
             <NavLink to='/game' activeClassName={s.active}>Game</NavLink>
         </div>
-        
+        <div className={s.item}>
+            <NavLink to='/settings' activeClassName={s.active}>Settings</NavLink>
+        </div>
     </nav>;
 };
 

@@ -9,6 +9,8 @@ import Preloader from './components/common/Preloader/Preloader';
 import { connect } from 'react-redux';
 import { AppStateType } from './redux/store';
 import { initializeApp } from './redux/appReducer';
+import RegisterPage from './components/AuthPage/RegisterPage';
+import SettingsPage from './components/SettingsPage/SettingsPage';
 
 class App extends React.Component<PropsType> {
 
@@ -25,8 +27,10 @@ class App extends React.Component<PropsType> {
                 <div className={s.content}>
                     <Switch>
                         <Route path='/auth' render={() => <AuthPage />} />
+                        <Route path='/register' render={() => <RegisterPage />} />
                         <Route path='/game' render={() => <GamePage />} />
-                        <Route path='*' render={() => (this.props.initialized ? <Redirect to={'/game'} /> : <Redirect to={'/auth'} />)} />
+                        <Route path='/settings' render={() => <SettingsPage />} />
+                        <Route path='*' render={() => (this.props.isAuth ? <Redirect to={'/game'} /> : <Redirect to={'/auth'} />)} />
                     </Switch>
                 </div>
             </div>
@@ -36,6 +40,7 @@ class App extends React.Component<PropsType> {
 
 const mapStateToProps = (state: AppStateType) => ({
     initialized: state.app.initialized,
+    isAuth: state.auth.isAuth,
 });
 
 export default connect<MapPropsType, DispatchPropsType, {}, AppStateType>(mapStateToProps, { initializeApp })(App);

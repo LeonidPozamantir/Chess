@@ -90,11 +90,33 @@
     b) Registration endpoint
     c) Settings page
     d) Settings enpoint
+    e) Show success notification
+
+10. Begin working on server game
+    a) Add "before game" status and corresponding UI
+    b) Open web socket after pressing start game button
+        https://www.valentinog.com/blog/socket-react/#socketio-react-and-nodejs-preparing-the-project
+        https://stackoverflow.com/questions/13095418/how-to-use-passport-with-express-and-socket-io
+    c) We need to make some order here in passport - serialize/deserialize and make user id
+    c) Let's begin with server sending random text answers
+    d) Build a game manager on server
+    e) Now let's server play a random move after random thinking time
+
+11. Make the full game cycle
+    a) Make order with sending pawn promotion move
 
 TODO:
 front:
 - show only relevant tabs
 - flip board
+- add validators for username and password
 
 back:
 - encrypt password
+- add validators for username, password and email
+- serialize user
+- make a separate login function (req.logIn ... res.send)
+- switch game manager to game id
+
+bugs:
+ - after logout-login-start game the board is not reset (that's right but should be implemented in a different way)

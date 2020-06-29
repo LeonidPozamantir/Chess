@@ -1,0 +1,10 @@
+.settingsPage {
+    background-color: snow;
+    width: 500px;
+    padding: 20px;
+}
+
+.saved {
+    color: turquoise;
+    border: solid turquoise 2px;
+}
