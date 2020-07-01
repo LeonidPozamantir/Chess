@@ -3,8 +3,8 @@ const router = Router();
 
 const gameManager = require('../lib/gameManager');
 
-router.post('/start', (req, res) => {
-    gameManager.createGame(req.user.id, -1);
+router.post('/request', (req, res) => {
+    gameManager.requestGame({ userId: req.user.id });
     res.status(200).json({ resultCode: 0, data: {}, messages: [] });
 });
 

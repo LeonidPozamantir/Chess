@@ -1,3 +1,8 @@
 .centre {
+    height: 100%;
     text-align: center;
+}
+
+.centre img {
+    height: 100%;
 }

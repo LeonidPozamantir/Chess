@@ -1,8 +1,9 @@
 import React from 'react';
 import s from './Board.module.css';
-import { pieceImages } from '../../../utils/pieceImages';
-import { PositionType, PiecePositionType, MoveType, PiecesListType, PromotionPieceType } from '../../../redux/gameReducer';
+import { pieceImages, PieceType } from '../../../utils/pieceImages';
+import { PositionType, PiecePositionType, MoveType, PiecesListType, PromotionPieceType, GameStatusEnum, GameResultEnum, Color } from '../../../redux/gameReducer';
 import PromotionChoice from './PromotionChoice';
+import GameComplete from './GameComplete';
 
 class Board extends React.Component<PropsType, StateType> {
 
@@ -14,7 +15,6 @@ class Board extends React.Component<PropsType, StateType> {
     }
 
     handleCellClick(x: number, y: number) {
-        if (this.props.isPromotion) return;
         const sc = this.state.selectedCell;
         if (sc) {
             this.props.makeMove({fromX: sc.x, fromY: sc.y, toX: x, toY: y});
@@ -24,18 +24,32 @@ class Board extends React.Component<PropsType, StateType> {
 
     handlePieceClick(p: PiecePositionType) {
         if (this.props.isPromotion) return;
-        if(this.state.selectedCell) this.handleCellClick(p.x, p.y);
+        if (this.props.gameStatus !== GameStatusEnum.InProgress) return;
+        if (this.state.selectedCell) {
+            this.handleCellClick(p.x, p.y);
+            return;
+        }
+
+        if (this.props.playerColor !== this.props.sideToMove) return;
+        if (this.getPieceColor(p.type) !== this.props.sideToMove) return;
         else this.setState({ selectedCell: {x: p.x, y: p.y} });
     }
 
     render() {
-        const {piecesList, sideToMove, isPromotion, choosePromotion} = this.props;
+        function calcLeft(x: number, color: Color) {
+            return color === 'w' ? (x - 1) * 12.5 + '%' : (8 - x) * 12.5 + '%';
+        }
+
+        function calcTop(y: number, color: Color) {
+            return color === 'w' ? (8 - y) * 12.5 + '%' : (y - 1) * 12.5 + '%';
+        }
+        const { piecesList, sideToMove, isPromotion, choosePromotion, gameStatus, gameResult, playerColor } = this.props;
         const r8_1 = [8, 7, 6, 5, 4, 3, 2, 1];
         const c1_8 = [1, 2, 3, 4, 5, 6, 7, 8];
         const rows = r8_1.map(rowNum => {
-            let top = (8 - rowNum) * 12.5 + '%';
+            let top = calcTop(rowNum, playerColor);
             return c1_8.map(colNum => {
-                let left = (colNum - 1) * 12.5 + '%';
+                let left = calcLeft(colNum, playerColor);
                 let sc = this.state.selectedCell;
                 let isSelected = sc && sc.x === colNum && sc.y === rowNum ? s.selected : '';
                 let color = (colNum + rowNum) % 2 === 0 ? 'black' : 'white';
@@ -43,13 +57,18 @@ class Board extends React.Component<PropsType, StateType> {
             });
         });
         const pieces = piecesList.map((p, idx) => {
-            return <img className={s.piece} key={idx} src={pieceImages[p.type]} onClick={() => this.handlePieceClick(p)} style={{left: (p.x - 1) * 12.5 + '%', top: (8 - p.y) * 12.5 + '%'}} />
+            return <img className={s.piece} key={idx} src={pieceImages[p.type]} onClick={() => this.handlePieceClick(p)} style={{left: calcLeft(p.x, playerColor), top: calcTop(p.y, playerColor)}} />
         });
         return <div className={s.board}>
             {rows}
             {pieces}
             {isPromotion && <PromotionChoice color={sideToMove} choosePromotion={choosePromotion} />}
+            {gameStatus === GameStatusEnum.Finished && <GameComplete gameResult={gameResult} />}
         </div>;
+    }
+
+    getPieceColor(pt: PieceType): Color {
+        return pt.substring(0, 1) as Color;
     }
     
 };
@@ -58,8 +77,11 @@ export default Board;
 
 type PropsType = {
     piecesList: PiecesListType,
-    sideToMove: 'w' | 'b',
+    sideToMove: Color,
     isPromotion: boolean,
+    gameStatus: GameStatusEnum,
+    gameResult: GameResultEnum,
+    playerColor: Color,
     makeMove: (move: MoveType) => void,
     choosePromotion: (pt: PromotionPieceType) => void,
 };

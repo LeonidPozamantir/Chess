@@ -11,7 +11,7 @@ class ChessPosition {
     canBCS: boolean
     canBCL: boolean
     enPassant: {x: number, y: number} | null
-    promotionChoice: {x: number, y: number} | null // pawn promotion field when user has to choose promotion piece
+    promotionChoice: MoveType | null // pawn promotion field when user has to choose promotion piece
 
     constructor() {
         this.piecesList = [];
@@ -28,6 +28,9 @@ class ChessPosition {
     setPiecesList(isDefault: boolean, piecesList?: PiecesListType) {}
     makeMove(move: MoveType): ChessPosition {}
     choosePromotion(pt: PromotionPieceType): ChessPosition {}
+    isMoveLegal(move: MoveType): boolean
+    isCheckmate(): boolean
+    isStalemate(): boolean
 };
 
 export const classUpdate = (NewClass: typeof ChessPosition) => {

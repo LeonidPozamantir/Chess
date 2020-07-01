@@ -6,16 +6,18 @@ import GameStatus from './GameStatus/GameStatus';
 import Board from './Board/Board';
 import { connect } from 'react-redux';
 import { AppStateType } from '../../redux/store';
-import { gameActions, MoveType, PromotionPieceType, makeMove } from '../../redux/gameReducer';
+import { gameActions, MoveType, PromotionPieceType, sendMove, choosePromotion } from '../../redux/gameReducer';
 
 class GamePage extends React.Component<PropsType> {
 
     render() {
-        const { piecesList, sideToMove, isPromotion, makeMove, choosePromotion } = this.props;
+        const { piecesList, sideToMove, isPromotion, makeMove, choosePromotion, gameStatus, gameResult, playerColor } = this.props;
         return <div className={s.externalContainer}>
             <div className={s.extendedBoard}>
                 <PlayerHeader />
-                <Board piecesList={piecesList} makeMove={makeMove} sideToMove={sideToMove} isPromotion={isPromotion} choosePromotion={choosePromotion}/>
+                <Board piecesList={piecesList} makeMove={makeMove} sideToMove={sideToMove} 
+                    isPromotion={isPromotion} choosePromotion={choosePromotion} gameStatus={gameStatus} gameResult={gameResult}
+                    playerColor={playerColor} />
                 <PlayerHeader />
             </div>
             <GameStatus />
@@ -28,12 +30,15 @@ const mapStateToProps = (state: AppStateType) => ({
     piecesList: state.game.position.piecesList,
     sideToMove: state.game.position.sideToMove,
     isPromotion: !!state.game.position.promotionChoice,
+    gameStatus: state.game.gameStatus,
+    gameResult: state.game.gameResult,
+    playerColor: state.game.playerColor,
 });
 
 export default withAuthRedirect(connect<MapPropsType, DispatchPropsType, {}, AppStateType>(mapStateToProps, {
-    makeMove: makeMove,
+    makeMove: sendMove,
     setDefaultPosition: gameActions.setDefaultPosition,
-    choosePromotion: gameActions.choosePromotion,
+    choosePromotion: choosePromotion,
 })(GamePage));
 
 type MapPropsType = ReturnType<typeof mapStateToProps>;

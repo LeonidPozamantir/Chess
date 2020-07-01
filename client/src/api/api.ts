@@ -1,6 +1,6 @@
 import axios from 'axios';
 import io, { Socket } from 'socket.io-client';
-import { MoveType } from '../redux/gameReducer';
+import { MoveType, GameActionEnum, MessageType } from '../redux/gameReducer';
 
 export const authAPI = {
     login: (userName: string, password: string, rememberMe = false) => {
@@ -43,7 +43,7 @@ export const socketAPI = {
     socket: null as SocketIOClient.Socket | null,
     initSocket: function() {
         this.socket = io();
-        this.socket.on('message', (message: any) => {
+        this.socket.on('message', (message: MessageType) => {
             if (this.callback) {
                 this.callback(message);
             }
@@ -52,18 +52,18 @@ export const socketAPI = {
     setCallback: function(callback: Function) {
         this.callback = callback;
     },
-    send(message: any) {
+    send(message: MessageType) {
         this.socket?.send(message);
     }
 };
 
 export const gameAPI = {
-    startGame: function() {
-        return axios.post<APIResponseType>('/game/start')
+    requestStartGame: function() {
+        return axios.post<APIResponseType>('/game/request')
         .then(res => res.data);
     },
     makeMove: function(move: MoveType) {
-        socketAPI.send(move);
+        socketAPI.send({ move });
         return Promise.resolve();
     },
 };

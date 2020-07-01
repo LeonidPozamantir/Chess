@@ -1,0 +1,12 @@
+.frame {
+    position: absolute;
+    top: calc(50% - 20px);
+    left: calc(50% - 150px);
+    height: 40px;
+    line-height: 40px;
+    width: 300px;
+    text-align: center;
+    background-color: snow;
+    border: double black 3px;
+    opacity: 75%;
+}

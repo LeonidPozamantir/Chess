@@ -101,9 +101,24 @@
     c) Let's begin with server sending random text answers
     d) Build a game manager on server
     e) Now let's server play a random move after random thinking time
+        - good point to check in production
 
 11. Make the full game cycle
     a) Make order with sending pawn promotion move
+    b) Add game complete status, checkmate and stalemate
+    c) Make UI for game completion (for now only checkmate and stalemate)
+    d) Add game completion logic to the server
+
+12. Connect the second human player
+    a) Check that there are no unreferenced games in the games array in game manager
+    b) Make UI for game request:
+        - divide game status into 3 divs
+        - add request status, preloader and stop button
+    c) Add actions to the socket message, start game after start game message was received
+    d) Make game request and pairing logic at the server side
+    e) Flip board for the black
+    f) Make sure that player cannot be paired with himself
+        - good point to check in production
 
 TODO:
 front:
@@ -114,7 +129,6 @@ front:
 back:
 - encrypt password
 - add validators for username, password and email
-- serialize user
 - make a separate login function (req.logIn ... res.send)
 - switch game manager to game id
 
