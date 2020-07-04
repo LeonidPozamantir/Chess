@@ -120,17 +120,41 @@
     f) Make sure that player cannot be paired with himself
         - good point to check in production
 
+13. Game UI improvements
+    a) Add player info to the headers
+    b) Show turn
+    c) Show the last move
+    d) Load the game status when the game page is opened
+    e) Delete (for now) finished game from the backend
+
+14. Game clock
+    a) Add clock to the UI
+    b) Add clock counter to the state
+    c) Add clock synchronization with backend
+    d) Fire action timeout
+        - good point to check in production
+
+15. Further improvements
+    a) Check in actions whether the game is in progress - both front and back
+    b) Implement offer draw and resign
+    c) Load profile picture
+
+16. Move list
+
 TODO:
 front:
 - show only relevant tabs
 - flip board
 - add validators for username and password
+- make order in auth data/user data/profile data
+- zero all necessary things when logging out
 
 back:
 - encrypt password
 - add validators for username, password and email
 - make a separate login function (req.logIn ... res.send)
 - switch game manager to game id
+- check if user is authenticated in all routes
 
 bugs:
  - after logout-login-start game the board is not reset (that's right but should be implemented in a different way)

@@ -1,7 +1,7 @@
 import React from 'react';
 import s from './Board.module.css';
 import { pieceImages, PieceType } from '../../../utils/pieceImages';
-import { PositionType, PiecePositionType, MoveType, PiecesListType, PromotionPieceType, GameStatusEnum, GameResultEnum, Color } from '../../../redux/gameReducer';
+import { PiecePositionType, MoveType, PiecesListType, PromotionPieceType, GameStatusEnum, GameResultEnum, Color } from '../../../redux/gameReducer';
 import PromotionChoice from './PromotionChoice';
 import GameComplete from './GameComplete';
 
@@ -43,7 +43,7 @@ class Board extends React.Component<PropsType, StateType> {
         function calcTop(y: number, color: Color) {
             return color === 'w' ? (8 - y) * 12.5 + '%' : (y - 1) * 12.5 + '%';
         }
-        const { piecesList, sideToMove, isPromotion, choosePromotion, gameStatus, gameResult, playerColor } = this.props;
+        const { piecesList, sideToMove, isPromotion, choosePromotion, gameStatus, gameResult, playerColor, lastMove } = this.props;
         const r8_1 = [8, 7, 6, 5, 4, 3, 2, 1];
         const c1_8 = [1, 2, 3, 4, 5, 6, 7, 8];
         const rows = r8_1.map(rowNum => {
@@ -51,7 +51,9 @@ class Board extends React.Component<PropsType, StateType> {
             return c1_8.map(colNum => {
                 let left = calcLeft(colNum, playerColor);
                 let sc = this.state.selectedCell;
-                let isSelected = sc && sc.x === colNum && sc.y === rowNum ? s.selected : '';
+                let isSelected = (sc && sc.x === colNum && sc.y === rowNum) 
+                    || (lastMove && lastMove.fromX === colNum && lastMove.fromY === rowNum)
+                    || (lastMove && lastMove.toX === colNum && lastMove.toY === rowNum) ? s.selected : '';
                 let color = (colNum + rowNum) % 2 === 0 ? 'black' : 'white';
                 return <div key={`${colNum}${rowNum}`} className={`${s.cell} ${s[color]} ${isSelected}`} style={{left, top}} onClick={() => this.handleCellClick(colNum, rowNum)}></div>;
             });
@@ -82,6 +84,7 @@ type PropsType = {
     gameStatus: GameStatusEnum,
     gameResult: GameResultEnum,
     playerColor: Color,
+    lastMove: MoveType | null,
     makeMove: (move: MoveType) => void,
     choosePromotion: (pt: PromotionPieceType) => void,
 };

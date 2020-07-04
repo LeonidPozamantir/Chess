@@ -1,4 +1,17 @@
 .playerHeader {
+    padding: 0 10px;
     height: var(--player-header-height);
+    line-height: var(--player-header-height);
     color: white;
+}
+
+.playerHeader.turn {
+    background-color: khaki;
+    color: black;
+}
+
+.clock {
+    float: right;
+    font-size: 25px;
+    font-weight: bold;
 }

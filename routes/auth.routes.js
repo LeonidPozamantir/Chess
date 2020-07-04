@@ -12,7 +12,7 @@ router.post('/login', (req, res, next) => {
               return next(err);
             }
             if (!req.body.rememberMe) req.session.cookie.maxAge = false;
-            return res.status(200).json({resultCode: 0, data: {userName: user.userName}, messages: []});
+            return res.status(200).json({resultCode: 0, data: { userName: user.userName, rating: user.rating }, messages: []}); // TODO: function user => userData
         });
     })(req, res, next);
 });
@@ -27,7 +27,7 @@ router.post('/register', (req, res) => {
               return next(err);
             }
             if (!req.body.rememberMe) req.session.cookie.maxAge = false;
-            return res.status(200).json({resultCode: 0, data: {userName: newUser.userName}, messages: []});
+            return res.status(200).json({resultCode: 0, data: { userName: newUser.userName, rating: newUser.rating }, messages: []}); // TODO: function user => userData
         });
     })
     .catch(err => {
@@ -37,7 +37,7 @@ router.post('/register', (req, res) => {
 
 router.get('/me', (req, res) => {
     let responseData = req.user 
-        ? {resultCode: 0, data: {userName: req.user.userName}, messages: []} 
+        ? {resultCode: 0, data: { userName: req.user.userName, rating: req.user.rating }, messages: []}  // TODO: function user => userData
         : {resultCode: 1, data: {}, messages: ['User is not logged in']};
     res.status(200).json(responseData);
 });

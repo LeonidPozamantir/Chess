@@ -1,10 +1,10 @@
 import axios from 'axios';
 import io, { Socket } from 'socket.io-client';
-import { MoveType, GameActionEnum, MessageType } from '../redux/gameReducer';
+import { MoveType, MessageType, GameInitialStateType, GameEventsEnum } from '../redux/gameReducer';
 
 export const authAPI = {
     login: (userName: string, password: string, rememberMe = false) => {
-        return axios.post<APIResponseType>('/auth/login', { userName, password, rememberMe })
+        return axios.post<APIResponseType<MeResponseDataType>>('/auth/login', { userName, password, rememberMe })
         .then(res => {
             socketAPI.initSocket();
             return res.data;
@@ -22,7 +22,7 @@ export const authAPI = {
         .then(res => res.data);
     },
     register: (userName: string, password: string, email: string, rememberMe: boolean) => {
-        return axios.post<APIResponseType>('/auth/register', { userName, password, email, rememberMe })
+        return axios.post<APIResponseType<MeResponseDataType>>('/auth/register', { userName, password, email, rememberMe })
         .then(res => res.data);
     },
 };
@@ -52,7 +52,7 @@ export const socketAPI = {
     setCallback: function(callback: Function) {
         this.callback = callback;
     },
-    send(message: MessageType) {
+    send(message: OutgoingMessageType) {
         this.socket?.send(message);
     }
 };
@@ -66,6 +66,10 @@ export const gameAPI = {
         socketAPI.send({ move });
         return Promise.resolve();
     },
+    getFullGameState: function() {
+        return axios.get<APIResponseType<GameInitialStateType>>('/game/state')
+        .then(res => res.data);
+    }
 };
 
 export enum ResultCodesEnum {
@@ -81,9 +85,12 @@ export type APIResponseType<D = {}, RC = ResultCodesEnum> = {
 
 type MeResponseDataType = {
     userName?: string,
+    rating?: number,
 };
 
 type SettingsResponseDataType = {
     email?: string,
     rating?: number,
-}
+};
+
+type OutgoingMessageType = { move?: MoveType, action?: GameEventsEnum };

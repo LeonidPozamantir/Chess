@@ -24,7 +24,7 @@ class ChessPosition {
         this.enPassant = null;
         this.promotionChoice = null;
     }
-    copy(): ChessPosition {}
+    copy(position?: ChessPosition): ChessPosition {}
     setPiecesList(isDefault: boolean, piecesList?: PiecesListType) {}
     makeMove(move: MoveType): ChessPosition {}
     choosePromotion(pt: PromotionPieceType): ChessPosition {}
