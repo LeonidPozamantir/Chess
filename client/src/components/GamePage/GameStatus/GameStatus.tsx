@@ -2,7 +2,7 @@ import React from 'react';
 import s from './GameStatus.module.css';
 import { connect } from 'react-redux';
 import { AppStateType } from '../../../redux/store';
-import { GameStatusEnum, requestStartGame } from '../../../redux/gameReducer';
+import { GameStatusEnum, requestStartGame, offerDraw, acceptDraw, declineDraw, resign } from '../../../redux/gameReducer';
 import Preloader from '../../common/Preloader/Preloader';
 
 const GameStatus: React.FC<PropsType> = (props) => {
@@ -22,9 +22,18 @@ const GameStatus: React.FC<PropsType> = (props) => {
             <div className={s.gameStatusContent}>
                 <div className={s.movesList}>
                 </div>
+                {props.opponentOfferedDraw &&
+                    <div className={s.offerDrawBlock}>
+                        <div className={s.drawRow}>Your opponent has offered draw</div>
+                        <div className={s.drawRow}>
+                            <button onClick={props.acceptDraw}>Accept</button>
+                            <button onClick={props.declineDraw}>Decline</button>
+                        </div>
+                    </div>
+                }
                 <div className={s.gameButtons}>
-                    <button>Offer draw</button>
-                    <button>Resign</button>
+                    <button onClick={props.offerDraw} disabled={props.wasDrawOffered || props.opponentOfferedDraw}>Offer draw</button>
+                    <button onClick={props.resign}>Resign</button>
                 </div>
             </div>
         }
@@ -34,13 +43,19 @@ const GameStatus: React.FC<PropsType> = (props) => {
 
 const mapStateToProps = (state: AppStateType) => ({
     gameStatus: state.game.gameStatus,
-    isWaitingForGameStart: state.game.isWaitingForGameStart
+    isWaitingForGameStart: state.game.isWaitingForGameStart,
+    wasDrawOffered: state.game.wasDrawOffered,
+    opponentOfferedDraw: state.game.opponentOfferedDraw,
 });
 
-export default connect<MapPropsType, DispatchPropsType, {}, AppStateType>(mapStateToProps, { startGame: requestStartGame })(GameStatus);
+export default connect<MapPropsType, DispatchPropsType, {}, AppStateType>(mapStateToProps, { startGame: requestStartGame, offerDraw, acceptDraw, declineDraw, resign })(GameStatus);
 
 type MapPropsType = ReturnType<typeof mapStateToProps>;
 type DispatchPropsType = {
     startGame: () => void,
+    offerDraw: () => void,
+    acceptDraw: () => void,
+    declineDraw: () => void,
+    resign: () => void,
 };
 type PropsType = MapPropsType & DispatchPropsType;

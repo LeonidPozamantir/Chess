@@ -6,12 +6,12 @@ import { required } from '../../utils/validators';
 import s from './SettingsPage.module.css';
 import { connect } from 'react-redux';
 import { AppStateType } from '../../redux/store';
-import { getUserProfile, saveSettings, actions } from '../../redux/profileReducer';
+import { saveSettings, actions, saveProfilePicture } from '../../redux/authReducer';
+import ProfilePicture from './ProfilePicture';
 
 class SettingsPage extends React.Component<PropsType> {
 
     componentDidMount() {
-        this.props.getUserProfile();
         this.props.setProfileSaved(false);
     }
 
@@ -20,9 +20,11 @@ class SettingsPage extends React.Component<PropsType> {
     };
 
     render() {
-        const { email, rating } = this.props;
+        const { email, rating, profilePicture, saveProfilePicture, errorMessageSavingPicture, setErrorSavingPicture } = this.props;
         return <div className={s.settingsPage}>
             <h1>Settings</h1>
+            <ProfilePicture profilePicture={profilePicture} saveProfilePicture={saveProfilePicture} 
+                    errorMessageSavingPicture={errorMessageSavingPicture} setErrorSavingPicture={setErrorSavingPicture} />
             <SettingsFormRedux onSubmit={this.handleSave} initialValues={{ email, rating }} wasSaved={this.props.wasSaved} />
         </div>;
     }
@@ -30,35 +32,41 @@ class SettingsPage extends React.Component<PropsType> {
 };
 
 const SettingsForm: React.FC<InjectedFormProps<SettingsFormValuesType, FormOwnPropsType> & FormOwnPropsType> = (props) => {
-    return <form onSubmit={props.handleSubmit}>
+    return <form className={s.settingsBlock} onSubmit={props.handleSubmit}>
         {createField<SettingsFormKeysType>('Email', 'email', Input, [required], {type: 'text'})}
         {createField<SettingsFormKeysType>('Fide rating', 'rating', Input, [], {type: 'number'})}
         {props.pristine && props.wasSaved && <div className={s.saved}>Successfully saved</div>}
-        <button>Save</button>
+        <button disabled={props.pristine}>Save</button>
     </form>
 };
 
 const SettingsFormRedux = reduxForm<SettingsFormValuesType, FormOwnPropsType>({ form: 'settings', enableReinitialize: true })(SettingsForm);
 
+
 const mapStateToProps = (state: AppStateType) => ({
-    email: state.profile.email,
-    rating: state.profile.rating,
-    wasSaved: state.profile.wasSaved,
+    email: state.auth.email,
+    rating: state.auth.rating,
+    wasSaved: state.auth.wasSaved,
+    profilePicture: state.auth.profilePicture,
+    errorMessageSavingPicture: state.auth.errorMessageSavingPicture,
 });
 
 export default withAuthRedirect(connect<MapPropsType, DispatchPropsType, {}, AppStateType>(
-    mapStateToProps, { getUserProfile, saveSettings, setProfileSaved: actions.setProfileSaved })(SettingsPage));
+    mapStateToProps, { saveSettings, setProfileSaved: actions.setProfileSaved, saveProfilePicture, setErrorSavingPicture: actions.setErrorSavingPicture })(SettingsPage));
 
 type SettingsFormValuesType = {
     email: string | null,
     rating: number | null,
+    profilePicture: string | null,
 };
 type SettingsFormKeysType = getStringKeys<SettingsFormValuesType>;
+
 type MapPropsType = ReturnType<typeof mapStateToProps>;
 type DispatchPropsType = {
-    getUserProfile: () => void,
     saveSettings: (email: string, rating: number | null) => void,
     setProfileSaved: (saved: boolean) => void,
+    saveProfilePicture: (pictureFile: File) => void,
+    setErrorSavingPicture: (isErrorSavingPicture: string | null) => void,
 };
 type FormOwnPropsType = {
     wasSaved: boolean,

@@ -12,7 +12,7 @@ router.post('/login', (req, res, next) => {
               return next(err);
             }
             if (!req.body.rememberMe) req.session.cookie.maxAge = false;
-            return res.status(200).json({resultCode: 0, data: { userName: user.userName, rating: user.rating }, messages: []}); // TODO: function user => userData
+            return res.status(200).json({resultCode: 0, data: getUserData(user), messages: []});
         });
     })(req, res, next);
 });
@@ -27,7 +27,7 @@ router.post('/register', (req, res) => {
               return next(err);
             }
             if (!req.body.rememberMe) req.session.cookie.maxAge = false;
-            return res.status(200).json({resultCode: 0, data: { userName: newUser.userName, rating: newUser.rating }, messages: []}); // TODO: function user => userData
+            return res.status(200).json({resultCode: 0, data: getUserData(newUser), messages: []});
         });
     })
     .catch(err => {
@@ -37,7 +37,7 @@ router.post('/register', (req, res) => {
 
 router.get('/me', (req, res) => {
     let responseData = req.user 
-        ? {resultCode: 0, data: { userName: req.user.userName, rating: req.user.rating }, messages: []}  // TODO: function user => userData
+        ? {resultCode: 0, data: getUserData(req.user), messages: []}
         : {resultCode: 1, data: {}, messages: ['User is not logged in']};
     res.status(200).json(responseData);
 });
@@ -50,5 +50,11 @@ router.post('/logout', (req, res) => {
 router.get('/getUserData', (req, res) => {
     res.status(200).json(req.user);
 });
+
+function getUserData(user) {
+    if (!user) return {};
+    const { userName, email, rating, profilePicture } = user;
+    return { userName, email, rating, profilePicture };
+}
 
 module.exports = router;

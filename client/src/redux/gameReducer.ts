@@ -27,14 +27,18 @@ export enum GameResultEnum {
 export const GameEvents = {
     StartGame: 0,
     OfferDraw: 1,
-    Resign: 2,
-    Timeout: 3,
+    AcceptDraw: 2,
+    DeclineDraw: 3,
+    Resign: 4,
+    Timeout: 5,
 } as const;
 export enum GameEventsEnum {
     StartGame = 0,
     OfferDraw = 1,
-    Resign = 2,
-    Timeout = 3,
+    AcceptDraw = 2,
+    DeclineDraw = 3,
+    Resign = 4,
+    Timeout = 5,
 };
 
 
@@ -47,10 +51,13 @@ const initialState = {
     opponentId: null as number | null,
     opponentName: null as string | null,
     opponentRating: null as number | null,
+    opponentProfilePicture: null as string | null,
     lastMove: null as MoveType | null,
     whiteRemainingTime: null as number | null,
     blackRemainingTime: null as number | null,
     timer: null as NodeJS.Timeout | null,
+    wasDrawOffered: false,
+    opponentOfferedDraw: false,
 };
 
 export const gameReducer = (state = initialState, action: ActionsType): GameInitialStateType => {
@@ -72,11 +79,15 @@ export const gameReducer = (state = initialState, action: ActionsType): GameInit
         case 'GAME/SET_IS_WAITING_FOR_GAME_START':
             return { ...state, isWaitingForGameStart: action.isWaitingForGameStart };
         case 'GAME/SET_GAME_DETAILS':
-            return { ...state, playerColor: action.color, opponentId: action.opponentId, opponentName: action.opponentName, opponentRating: action.opponentRating };
+            return { ...state, playerColor: action.color, opponentId: action.opponentId, opponentName: action.opponentName, opponentRating: action.opponentRating, opponentProfilePicture: action.opponentProfilePicture };
         case 'GAME/SET_REMAINING_TIME':
             if (action.color === 'w') return { ...state, whiteRemainingTime: action.time }; else return { ...state, blackRemainingTime: action.time };
         case 'GAME/SET_TIMER':
             return { ...state, timer: action.timer };
+        case 'GAME/SET_DRAW_OFFERED':
+            return { ...state, wasDrawOffered: action.wasDrawOffered }
+        case 'GAME/SET_OPPONENT_OFFERED_DRAW':
+            return { ...state, opponentOfferedDraw: action.opponentOfferedDraw };
         default:
             return state;
     }
@@ -90,9 +101,11 @@ export const gameActions = {
     setGameStatus: (gameStatus: GameStatusEnum) => ({ type: 'GAME/SET_GAME_STATUS', gameStatus } as const),
     setGameResult: (gameResult: GameResultEnum) => ({ type: 'GAME/SET_GAME_RESULT', gameResult } as const),
     setIsWaitingForGameStart: (isWaitingForGameStart: boolean) => ({ type: 'GAME/SET_IS_WAITING_FOR_GAME_START', isWaitingForGameStart } as const),
-    setGameDetails: (color: Color, opponentId: number | null, opponentName: string | null, opponentRating: number | null) => ({ type: 'GAME/SET_GAME_DETAILS', color, opponentId, opponentName, opponentRating } as const),
+    setGameDetails: (color: Color, opponentId: number | null, opponentName: string | null, opponentRating: number | null, opponentProfilePicture: string | null) => ({ type: 'GAME/SET_GAME_DETAILS', color, opponentId, opponentName, opponentRating, opponentProfilePicture } as const),
     setRemainingTime: (color: Color, time: number | null) => ({ type: 'GAME/SET_REMAINING_TIME', color, time } as const),
     setTimer: (timer: NodeJS.Timeout | null) => ({ type: 'GAME/SET_TIMER', timer } as const),
+    setDrawOffered: (wasDrawOffered: boolean) => ({ type: 'GAME/SET_DRAW_OFFERED', wasDrawOffered } as const),
+    setOpponentOfferedDraw: (opponentOfferedDraw: boolean) => ({ type: 'GAME/SET_OPPONENT_OFFERED_DRAW', opponentOfferedDraw } as const),
 };
 
 export const requestStartGame = (): ThunkType => dispatch => {
@@ -102,12 +115,13 @@ export const requestStartGame = (): ThunkType => dispatch => {
 }
 
 export const processMessage = (message: MessageType): BaseThunkType<ActionsType, void> => (dispatch) => {
+    console.log('message received', message)
     if (message.type === 'move') {
         dispatch(gameActions.setRemainingTime('w', message.whiteRemainingTime));
         dispatch(gameActions.setRemainingTime('b', message.blackRemainingTime));
         dispatch(makeMoveAndUpdateGameStatus(message.move));
     }
-    if (message.type === 'event') dispatch(processAction(message));
+    if (message.type === 'event') dispatch(processEvent(message));
 };
 
 export const getFullGameState = (): ThunkType => (dispatch) => {
@@ -121,11 +135,13 @@ export const getFullGameState = (): ThunkType => (dispatch) => {
             }
             if (gameData.gameStatus === GameStatusEnum.InProgress) {
                 dispatch(gameActions.setPosition(gameData.position, gameData.lastMove));
-                dispatch(gameActions.setGameDetails(gameData.playerColor, gameData.opponentId, gameData.opponentName, gameData.opponentRating));
+                dispatch(gameActions.setGameDetails(gameData.playerColor, gameData.opponentId, gameData.opponentName, gameData.opponentRating, gameData.opponentProfilePicture));
                 dispatch(gameActions.setGameStatus(GameStatusEnum.InProgress));
                 dispatch(gameActions.setGameResult(GameResultEnum.NotFinished));
                 dispatch(gameActions.setRemainingTime('w', gameData.whiteRemainingTime));
                 dispatch(gameActions.setRemainingTime('b', gameData.blackRemainingTime));
+                dispatch(gameActions.setDrawOffered(gameData.wasDrawOffered));
+                dispatch(gameActions.setOpponentOfferedDraw(gameData.opponentOfferedDraw));
                 dispatch(launchTimer(gameData.position.sideToMove));
             }
         }
@@ -133,7 +149,9 @@ export const getFullGameState = (): ThunkType => (dispatch) => {
 }
 
 export const makeMoveAndUpdateGameStatus = (move: MoveType): BaseThunkType<ActionsType, void> => (dispatch, getState) => {
+    if (getState().game.gameStatus !== GameStatusEnum.InProgress) return;
     dispatch(gameActions.makeMove(move));
+    dispatch(gameActions.setOpponentOfferedDraw(false));
     const position = getState().game.position;
     if (position.isCheckmate()) {
         const gameResult = position.sideToMove === 'w' ? GameResultEnum.BlackWonByCheckmate : GameResultEnum.WhiteWonByCheckmate;
@@ -148,6 +166,7 @@ export const makeMoveAndUpdateGameStatus = (move: MoveType): BaseThunkType<Actio
 }
 
 export const sendMove = (move: MoveType): ThunkType => (dispatch, getState) => {
+    if (getState().game.gameStatus !== GameStatusEnum.InProgress) return Promise.resolve();
     let position = getState().game.position;
     if (!position.isMoveLegal(move)) return Promise.resolve();
     dispatch(makeMoveAndUpdateGameStatus(move));
@@ -166,7 +185,27 @@ export const choosePromotion = (pt: PromotionPieceType): ThunkType => (dispatch,
     return gameAPI.makeMove(move);
 };
 
+export const offerDraw = (): BaseThunkType<ActionsType, void> => (dispatch) => {
+    gameAPI.offerDraw();
+    dispatch(gameActions.setDrawOffered(true));
+};
+
+export const acceptDraw = (): BaseThunkType<ActionsType, void> => (dispatch) => {
+    gameAPI.acceptDraw();
+    dispatch(gameActions.setOpponentOfferedDraw(false));
+};
+
+export const declineDraw = (): BaseThunkType<ActionsType, void> => (dispatch) => {
+    gameAPI.declineDraw();
+    dispatch(gameActions.setOpponentOfferedDraw(false));
+};
+
+export const resign = (): BaseThunkType<ActionsType, void> => () => {
+    gameAPI.resign();
+};
+
 const launchTimer = (color: Color): BaseThunkType<ActionsType, void> => (dispatch, getState) => {
+    if (getState().game.gameStatus !== GameStatusEnum.InProgress) return;
     const timer = setInterval(() => {
         let remTime = color === 'w' ? getState().game.whiteRemainingTime : getState().game.blackRemainingTime;
         if (!remTime) return;
@@ -178,23 +217,34 @@ const launchTimer = (color: Color): BaseThunkType<ActionsType, void> => (dispatc
     dispatch(gameActions.setTimer(timer));
 };
 
-export const processAction = (action: EventMessageType): BaseThunkType<ActionsType, void> => (dispatch) => {
-    debugger;
-    switch (action.eventType) {
+export const processEvent = (event: EventMessageType): BaseThunkType<ActionsType, void> => (dispatch) => {
+    switch (event.eventType) {
         case GameEvents.StartGame:
             dispatch(gameActions.setDefaultPosition());
             dispatch(gameActions.setGameStatus(GameStatusEnum.InProgress));
             dispatch(gameActions.setGameResult(GameResultEnum.NotFinished));
-            dispatch(gameActions.setGameDetails(action.color, action.opponentId, action.opponentName, action.opponentRating));
+            dispatch(gameActions.setGameDetails(event.color, event.opponentId, event.opponentName, event.opponentRating, event.opponentProfilePicture));
             dispatch(gameActions.setIsWaitingForGameStart(false));
-            dispatch(gameActions.setRemainingTime('w', action.timeControl.game * 60 * 1000));
-            dispatch(gameActions.setRemainingTime('b', action.timeControl.game * 60 * 1000));
+            dispatch(gameActions.setRemainingTime('w', event.timeControl.game * 60 * 1000));
+            dispatch(gameActions.setRemainingTime('b', event.timeControl.game * 60 * 1000));
+            dispatch(gameActions.setDrawOffered(false));
+            dispatch(gameActions.setOpponentOfferedDraw(false));
             dispatch(launchTimer('w'));
             break;
         case GameEvents.Timeout:
-            dispatch(gameActions.setRemainingTime('w', action.whiteRemainingTime));
-            dispatch(gameActions.setRemainingTime('b', action.blackRemainingTime));
-            dispatch(finishGame(action.gameResult));
+            dispatch(gameActions.setRemainingTime('w', event.whiteRemainingTime));
+            dispatch(gameActions.setRemainingTime('b', event.blackRemainingTime));
+            dispatch(finishGame(event.gameResult));
+            break;
+        case GameEvents.OfferDraw:
+            dispatch(gameActions.setOpponentOfferedDraw(true));
+            break;
+        case GameEvents.AcceptDraw:
+            dispatch(finishGame(GameResultEnum.DrawAccepted));
+            break;
+        case GameEvents.Resign:
+            dispatch(finishGame(event.gameResult));
+            break;
     }
 };
 
@@ -229,6 +279,7 @@ type StartGameMessageType = {
     opponentId: number,
     opponentName: string,
     opponentRating: number,
+    opponentProfilePicture: string,
     color: Color,
     timeControl: { game: number },
 };
@@ -239,5 +290,22 @@ type TimeoutMessageType = {
     whiteRemainingTime: number,
     blackRemainingTime: number,
 };
-type EventMessageType = { type: 'event' } & (StartGameMessageType | TimeoutMessageType);
+type OfferDrawMessageType = {
+    eventType: typeof GameEvents.OfferDraw,
+    opponentId: number,
+};
+type AcceptDrawMessageType = {
+    eventType: typeof GameEvents.AcceptDraw,
+    opponentId: number,
+};
+type DeclineDrawMessageType = {
+    eventType: typeof GameEvents.DeclineDraw,
+    opponentId: number,
+};
+type ResignMessageType = {
+    eventType: typeof GameEvents.Resign,
+    opponentId: number,
+    gameResult: GameResultEnum,
+};
+type EventMessageType = { type: 'event' } & (StartGameMessageType | TimeoutMessageType | OfferDrawMessageType | AcceptDrawMessageType | DeclineDrawMessageType | ResignMessageType);
 export type MessageType = MoveMessageType | EventMessageType;

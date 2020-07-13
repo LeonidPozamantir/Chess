@@ -13,6 +13,7 @@ const PlayerHeader: React.FC<PropsType> = (props) => {
         time = `${hours}:${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
     }
     return <div className={`${s.playerHeader} ${props.turn ? s.turn : ''}`}>
+        <img src={props.profilePicture || ''} />
         {props.name} {props.rating && `(${props.rating})`}
         <div className={s.clock}>{time}</div>
     </div>;
@@ -25,4 +26,5 @@ type PropsType = {
     rating: number,
     turn: boolean,
     remTime: number | null,
+    profilePicture: string | null,
 };

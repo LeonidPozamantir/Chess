@@ -144,10 +144,10 @@
 TODO:
 front:
 - show only relevant tabs
-- flip board
 - add validators for username and password
 - make order in auth data/user data/profile data
 - zero all necessary things when logging out
+- only finish game when get a response from the server
 
 back:
 - encrypt password
@@ -155,6 +155,7 @@ back:
 - make a separate login function (req.logIn ... res.send)
 - switch game manager to game id
 - check if user is authenticated in all routes
+- move S3 connection to a separate class
 
 bugs:
  - after logout-login-start game the board is not reset (that's right but should be implemented in a different way)

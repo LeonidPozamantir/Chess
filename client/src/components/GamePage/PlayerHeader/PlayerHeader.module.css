@@ -1,8 +1,18 @@
 .playerHeader {
+    position: relative;
     padding: 0 10px;
     height: var(--player-header-height);
     line-height: var(--player-header-height);
     color: white;
+    display: flex;
+    flex-direction: row;
+}
+
+.playerHeader img {
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-right: 10px;
+    height: 90%;
 }
 
 .playerHeader.turn {
@@ -11,7 +21,7 @@
 }
 
 .clock {
-    float: right;
+    margin-left: auto;
     font-size: 25px;
     font-weight: bold;
 }

@@ -1,5 +1,7 @@
 import axios from 'axios';
-import io, { Socket } from 'socket.io-client';
+import io from 'socket.io-client';
+import path from 'path';
+
 import { MoveType, MessageType, GameInitialStateType, GameEventsEnum } from '../redux/gameReducer';
 
 export const authAPI = {
@@ -25,15 +27,18 @@ export const authAPI = {
         return axios.post<APIResponseType<MeResponseDataType>>('/auth/register', { userName, password, email, rememberMe })
         .then(res => res.data);
     },
-};
-
-export const profileAPI = {
     saveSettings: (email: string, rating: number | null) => {
         return axios.post<APIResponseType>('/profile/saveSettings', { email, rating })
         .then(res => res.data);
     },
-    getProfile: () => {
-        return axios.get<APIResponseType<SettingsResponseDataType>>('/profile')
+    saveProfilePicture: (file: File) => {
+        return axios.post<APIResponseType<SaveProfilePictureResponseDataType>>('/profile/savePicture', file, {
+            headers: {
+                'Content-Type': file.type,
+                'Content-Disposition': `attachment; filename="somepic.jpg"`,
+                'x-extension': path.extname(file.name),
+            },
+        })
         .then(res => res.data);
     },
 };
@@ -69,7 +74,19 @@ export const gameAPI = {
     getFullGameState: function() {
         return axios.get<APIResponseType<GameInitialStateType>>('/game/state')
         .then(res => res.data);
-    }
+    },
+    offerDraw: function() {
+        socketAPI.send({ action: GameEventsEnum.OfferDraw });
+    },
+    acceptDraw: function() {
+        socketAPI.send({ action: GameEventsEnum.AcceptDraw });
+    },
+    declineDraw: function() {
+        socketAPI.send({ action: GameEventsEnum.DeclineDraw });
+    },
+    resign: function() {
+        socketAPI.send({ action: GameEventsEnum.Resign });
+    },
 };
 
 export enum ResultCodesEnum {
@@ -85,12 +102,11 @@ export type APIResponseType<D = {}, RC = ResultCodesEnum> = {
 
 type MeResponseDataType = {
     userName?: string,
-    rating?: number,
-};
-
-type SettingsResponseDataType = {
     email?: string,
     rating?: number,
+    profilePicture?: string | null,
 };
 
 type OutgoingMessageType = { move?: MoveType, action?: GameEventsEnum };
+
+type SaveProfilePictureResponseDataType = { fileLink: string };

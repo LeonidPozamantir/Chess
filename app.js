@@ -26,6 +26,7 @@ const sessionMiddleware = session({
 });
 
 app.use(express.json());
+app.use(express.raw({ type: 'image/*', limit: '3mb' }));
 app.use(sessionMiddleware);
 app.use(passport.initialize());
 app.use(passport.session());

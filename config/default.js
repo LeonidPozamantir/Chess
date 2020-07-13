@@ -6,4 +6,7 @@ module.exports = {
     secrets: {
         session: 'keyboard cat',
     },
+    storage: {
+        s3Url: 'https://leochess.s3.eu-central-1.amazonaws.com/',
+    },
 };
