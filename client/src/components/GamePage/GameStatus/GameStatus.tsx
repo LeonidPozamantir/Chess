@@ -6,6 +6,13 @@ import { GameStatusEnum, requestStartGame, offerDraw, acceptDraw, declineDraw, r
 import Preloader from '../../common/Preloader/Preloader';
 
 const GameStatus: React.FC<PropsType> = (props) => {
+    const movesList = props.moves.map((m, idx) => {
+        return <div className={s.moveLine}>
+            <div className={s.whiteMove}>{idx + 1}. {m.w ? m.w.notation : '...'}</div>
+            <div className={s.blackMove}>{m.b ? m.b.notation : ''}</div>
+        </div>
+    });
+
     return <div className={`${s.gameStatus}`}>
         {props.gameStatus !== GameStatusEnum.InProgress && 
             <div className={s.gameStartBlock}>
@@ -21,6 +28,7 @@ const GameStatus: React.FC<PropsType> = (props) => {
         {props.gameStatus === GameStatusEnum.InProgress && 
             <div className={s.gameStatusContent}>
                 <div className={s.movesList}>
+                    {movesList}
                 </div>
                 {props.opponentOfferedDraw &&
                     <div className={s.offerDrawBlock}>
@@ -46,6 +54,7 @@ const mapStateToProps = (state: AppStateType) => ({
     isWaitingForGameStart: state.game.isWaitingForGameStart,
     wasDrawOffered: state.game.wasDrawOffered,
     opponentOfferedDraw: state.game.opponentOfferedDraw,
+    moves: state.game.moves,
 });
 
 export default connect<MapPropsType, DispatchPropsType, {}, AppStateType>(mapStateToProps, { startGame: requestStartGame, offerDraw, acceptDraw, declineDraw, resign })(GameStatus);

@@ -5,8 +5,13 @@ module.exports = {
     },
     secrets: {
         session: 'keyboard cat',
+        s3: {
+            keyId: '',
+            secretKey: '',
+        },
     },
     storage: {
         s3Url: 'https://leochess.s3.eu-central-1.amazonaws.com/',
+        bucketName: 'leochess',
     },
 };

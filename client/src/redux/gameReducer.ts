@@ -58,6 +58,7 @@ const initialState = {
     timer: null as NodeJS.Timeout | null,
     wasDrawOffered: false,
     opponentOfferedDraw: false,
+    moves: [] as Array<{w?: MoveRecordType, b?: MoveRecordType}>,
 };
 
 export const gameReducer = (state = initialState, action: ActionsType): GameInitialStateType => {
@@ -88,6 +89,14 @@ export const gameReducer = (state = initialState, action: ActionsType): GameInit
             return { ...state, wasDrawOffered: action.wasDrawOffered }
         case 'GAME/SET_OPPONENT_OFFERED_DRAW':
             return { ...state, opponentOfferedDraw: action.opponentOfferedDraw };
+        case 'GAME/ADD_MOVE_RECORD':
+            let newMoves = [...state.moves];
+            const sideToMove = action.sideToMove || state.position.sideToMove;
+            if (sideToMove === 'w' || newMoves.length === 0) newMoves.push({});
+            newMoves[newMoves.length - 1][sideToMove] = { move: action.move, notation: action.notation };
+            return { ...state, moves: newMoves };
+        case 'GAME/RESET_MOVES_LIST':
+            return { ...state, moves: action.moves };
         default:
             return state;
     }
@@ -106,6 +115,8 @@ export const gameActions = {
     setTimer: (timer: NodeJS.Timeout | null) => ({ type: 'GAME/SET_TIMER', timer } as const),
     setDrawOffered: (wasDrawOffered: boolean) => ({ type: 'GAME/SET_DRAW_OFFERED', wasDrawOffered } as const),
     setOpponentOfferedDraw: (opponentOfferedDraw: boolean) => ({ type: 'GAME/SET_OPPONENT_OFFERED_DRAW', opponentOfferedDraw } as const),
+    addMoveRecord: (move: MoveType, notation: string, sideToMove?: Color) => ({ type: 'GAME/ADD_MOVE_RECORD', move, notation, sideToMove } as const),
+    setMovesList: (moves: Array<{w?: MoveRecordType, b?: MoveRecordType}>) => ({ type: 'GAME/RESET_MOVES_LIST', moves } as const),
 };
 
 export const requestStartGame = (): ThunkType => dispatch => {
@@ -114,11 +125,11 @@ export const requestStartGame = (): ThunkType => dispatch => {
     .then((data => {}));
 }
 
-export const processMessage = (message: MessageType): BaseThunkType<ActionsType, void> => (dispatch) => {
-    console.log('message received', message)
+export const processMessage = (message: MessageType): BaseThunkType<ActionsType, void> => (dispatch, getState) => {
     if (message.type === 'move') {
         dispatch(gameActions.setRemainingTime('w', message.whiteRemainingTime));
         dispatch(gameActions.setRemainingTime('b', message.blackRemainingTime));
+        dispatch(gameActions.addMoveRecord(message.move, getState().game.position.getMoveNotation(message.move)));
         dispatch(makeMoveAndUpdateGameStatus(message.move));
     }
     if (message.type === 'event') dispatch(processEvent(message));
@@ -142,6 +153,7 @@ export const getFullGameState = (): ThunkType => (dispatch) => {
                 dispatch(gameActions.setRemainingTime('b', gameData.blackRemainingTime));
                 dispatch(gameActions.setDrawOffered(gameData.wasDrawOffered));
                 dispatch(gameActions.setOpponentOfferedDraw(gameData.opponentOfferedDraw));
+                dispatch(gameActions.setMovesList(gameData.moves));
                 dispatch(launchTimer(gameData.position.sideToMove));
             }
         }
@@ -165,21 +177,27 @@ export const makeMoveAndUpdateGameStatus = (move: MoveType): BaseThunkType<Actio
     dispatch(launchTimer(position.sideToMove));
 }
 
-export const sendMove = (move: MoveType): ThunkType => (dispatch, getState) => {
+export const playerMakeMove = (move: MoveType): ThunkType => (dispatch, getState) => {
     if (getState().game.gameStatus !== GameStatusEnum.InProgress) return Promise.resolve();
     let position = getState().game.position;
     if (!position.isMoveLegal(move)) return Promise.resolve();
+    const moveNotation = position.getMoveNotation(move);
+    const sideToMove = position.sideToMove;
     dispatch(makeMoveAndUpdateGameStatus(move));
     position = getState().game.position;
-    if (!position.promotionChoice) return gameAPI.makeMove(move);
+    if (!position.promotionChoice) {
+        dispatch(gameActions.addMoveRecord(move, moveNotation, sideToMove));
+        return gameAPI.makeMove(move);
+    }
     return Promise.resolve();
 };
 
 export const choosePromotion = (pt: PromotionPieceType): ThunkType => (dispatch, getState) => {
     const move = getState().game.position.promotionChoice;
     if (!move) return Promise.resolve();
-    dispatch(gameActions.choosePromotion(pt));
     move.promoteTo = pt;
+    dispatch(gameActions.addMoveRecord(move, getState().game.position.getMoveNotation(move)));
+    dispatch(gameActions.choosePromotion(pt));
     const position = getState().game.position;
     dispatch(launchTimer(position.sideToMove));
     return gameAPI.makeMove(move);
@@ -229,6 +247,7 @@ export const processEvent = (event: EventMessageType): BaseThunkType<ActionsType
             dispatch(gameActions.setRemainingTime('b', event.timeControl.game * 60 * 1000));
             dispatch(gameActions.setDrawOffered(false));
             dispatch(gameActions.setOpponentOfferedDraw(false));
+            dispatch(gameActions.setMovesList([]));
             dispatch(launchTimer('w'));
             break;
         case GameEvents.Timeout:
@@ -309,3 +328,7 @@ type ResignMessageType = {
 };
 type EventMessageType = { type: 'event' } & (StartGameMessageType | TimeoutMessageType | OfferDrawMessageType | AcceptDrawMessageType | DeclineDrawMessageType | ResignMessageType);
 export type MessageType = MoveMessageType | EventMessageType;
+type MoveRecordType = {
+    move: MoveType,
+    notation: string,
+};

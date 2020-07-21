@@ -138,8 +138,15 @@
     a) Check in actions whether the game is in progress - both front and back
     b) Implement offer draw and resign
     c) Load profile picture
+        - good point to check in production
 
 16. Move list
+    a) add a function to the ChessPosition class that converts a move to its text representation
+    b) Save the moves list at front and show moves on the screen
+    c) Backend side, return moves list with the game state
+
+17. Database connection and saving games
+    
 
 TODO:
 front:

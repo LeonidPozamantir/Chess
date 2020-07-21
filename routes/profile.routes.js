@@ -1,10 +1,9 @@
 const { Router } = require("express");
+
 const dbConnector = require("../lib/dbConnector");
 const router = Router();
-const config = require('config');
-const AWS = require('aws-sdk');
-const s3 = new AWS.S3({ accessKeyId: config.secrets.s3.keyId, secretAccessKey: config.secrets.s3.secretKey });
-const { uuid } = require('uuidv4');
+const storageManager = require('../lib/storageManager');
+
 
 router.get('/', (req, res) => {
     dbConnector.getUserByName(req.user.userName)
@@ -21,23 +20,15 @@ router.post('/saveSettings', (req, res) => {
 });
 
 router.post('/savePicture', (req, res) => {
-    const filename = uuid().replace(/-/g, '_') + req.headers['x-extension'] || '.ext';
-    const prefix = config.storage.s3Url;
-    const fullUrl = prefix + filename;
     dbConnector.getUserById(req.user.id)
     .then(user => {
         oldProfilePictureLink = user.profilePicture;
-        if (oldProfilePictureLink) return s3.deleteObject({ Bucket: 'leochess', Key: oldProfilePictureLink.substring(prefix.length) }).promise();
+        if (oldProfilePictureLink) return storageManager.deleteFile(oldProfilePictureLink);
     })
-    .then(res => console.log(res))
-    .then(() => s3.putObject({ Bucket: 'leochess', Key: filename, Body: req.body }).promise())
-    .then(() => dbConnector.setProfilePicture(req.user.id, fullUrl))
-    .then(() => {
+    .then(() => storageManager.putFile(req.body, req.headers['x-extension']))
+    .tap((fullUrl) => dbConnector.setProfilePicture(req.user.id, fullUrl))
+    .then((fullUrl) => {
         res.status(200).json({ resultCode: 0, data: {fileLink: fullUrl}, messages: [] });
-    })
-    .then(() => dbConnector.getUserById(req.user.id))
-    .then(user => {
-
     })
     .catch(err => {
         res.status(200).json({ resultCode: 1, data: {}, messages: ['Server error'] });

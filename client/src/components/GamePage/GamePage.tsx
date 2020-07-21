@@ -6,7 +6,7 @@ import GameStatus from './GameStatus/GameStatus';
 import Board from './Board/Board';
 import { connect } from 'react-redux';
 import { AppStateType } from '../../redux/store';
-import { gameActions, MoveType, PromotionPieceType, sendMove, choosePromotion, GameStatusEnum, getFullGameState, offerDraw } from '../../redux/gameReducer';
+import { gameActions, MoveType, PromotionPieceType, playerMakeMove, choosePromotion, GameStatusEnum, getFullGameState, offerDraw } from '../../redux/gameReducer';
 
 class GamePage extends React.Component<PropsType> {
 
@@ -53,7 +53,7 @@ const mapStateToProps = (state: AppStateType) => ({
 });
 
 export default withAuthRedirect(connect<MapPropsType, DispatchPropsType, {}, AppStateType>(mapStateToProps, {
-    makeMove: sendMove,
+    makeMove: playerMakeMove,
     setDefaultPosition: gameActions.setDefaultPosition,
     choosePromotion,
     getFullGameState,

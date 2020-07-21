@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { getStringKeys } from "../components/common/FormControls/FormControls";
 import { PiecesListType, MoveType, Color, PromotionPieceType } from "../redux/gameReducer";
+import { PieceType } from "./pieceImages";
 
 class ChessPosition {
     piecesList: PiecesListType
@@ -24,6 +25,7 @@ class ChessPosition {
         this.enPassant = null;
         this.promotionChoice = null;
     }
+
     copy(position?: ChessPosition): ChessPosition {}
     setPiecesList(isDefault: boolean, piecesList?: PiecesListType) {}
     makeMove(move: MoveType): ChessPosition {}
@@ -31,6 +33,7 @@ class ChessPosition {
     isMoveLegal(move: MoveType): boolean
     isCheckmate(): boolean
     isStalemate(): boolean
+    getMoveNotation(move: MoveType): string
 };
 
 export const classUpdate = (NewClass: typeof ChessPosition) => {

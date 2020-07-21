@@ -20,8 +20,27 @@
 }
 
 .movesList {
+    padding-top: 10px;
     background-color: snow;
-    height: calc(100% - 150px);
+    height: calc(100% - 160px);
+}
+
+.moveLine {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.move {
+    font-size: 16px;
+}
+
+.whiteMove {
+    width: 80px;
+}
+
+.blackMove {
+    width: 60px;
 }
 
 .gameButtons {
